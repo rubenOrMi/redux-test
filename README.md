@@ -1,27 +1,107 @@
-# 4CounterApp
+# Angular Counter App with Redux
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.1.
+Este proyecto es una aplicación simple de contador hecha en Angular que utiliza Redux para el manejo del estado.
 
-## Development server
+## Estructura del Proyecto
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+El proyecto contiene los siguientes archivos principales:
 
-## Code scaffolding
+- `items.action.ts`
+- `item.reducer.ts`
+- `counter.component.ts`
+- `counter.component.html`
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## items.action.ts
 
-## Build
+Este archivo define las acciones que se pueden realizar en el contador.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```typescript
+import { createAction, props } from "@ngrx/store";
 
-## Running unit tests
+export const increment = createAction('[Counter Component] Increment', props<{add: number}>());
+export const decrement = createAction('[Counter Component] Decrement');
+export const reset = createAction('[Counter Component] Reset');
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## item.reducer.ts
 
-## Running end-to-end tests
+Este archivo define el reducer que maneja los cambios de estado basados en las acciones.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```typescript
+import { createReducer, on } from "@ngrx/store";
+import { decrement, increment, reset } from "./items.action";
 
-## Further help
+export const initialState = 0;
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+export const counterReducer = createReducer(
+    initialState,
+    on(increment, (state, { add }) => state + add),
+    on(decrement, (state) => state - 1),
+    on(reset, (state) => 0)
+)
+```
+
+## counter.component.ts
+
+Este archivo define el componente principal de la aplicación que interactúa con la store de Redux.
+
+```typescript
+import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { decrement, increment, reset } from '../store/items.action';
+
+@Component({
+  selector: 'app-counter',
+  standalone: true,
+  imports: [],
+  templateUrl: './counter.component.html'
+})
+export class CounterComponent {
+
+  title: string = 'Counter App con Redux'
+  counter: number = 0;
+
+  constructor(private store: Store<{counter: number}>){
+    this.store.select('counter').subscribe(counter => {
+      this.counter = counter;
+    });
+  }
+
+  increment(){
+    this.store.dispatch(increment({add: 3}));
+  }
+
+  decrement(){
+    this.store.dispatch(decrement());
+  }
+
+  reset(){
+    this.store.dispatch(reset());
+  }
+}
+```
+
+## counter.component.html
+
+Este archivo define la vista del componente de contador.
+
+```html
+<h3>{{ title }}</h3>
+
+<button (click)="increment()">Increment</button>
+<div>Contador actual: {{ counter }}</div>
+<button (click)="decrement()">Decrement</button>
+<button (click)="reset()">Reset</button>
+```
+
+## Cómo Ejecutar el Proyecto
+
+Clona el repositorio.
+Instala las dependencias usando npm install.
+Ejecuta el proyecto con ng serve.
+Abre tu navegador y navega a http://localhost:4200.
+¡Eso es todo! Ahora deberías ver tu aplicación de contador funcionando con Redux.
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT.
